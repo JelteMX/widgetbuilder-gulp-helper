@@ -74,7 +74,7 @@ function changeXML(file, callback, version) {
                 console.log();
                 gutil.log("Current version is " + gutil.colors.cyan(currentVersion));
                 gutil.log("Set new version by running '" + gutil.colors.cyan("gulp version --n=x.y.z"));
-                gutil.log("                        or '" + gutil.colors.cyan("npm version -- --n=x.y.z") + "'\n");
+                gutil.log("                        or '" + gutil.colors.cyan("npm run version -- --n=x.y.z") + "'\n");
                 callback(null, file);
                 return;
             } else {
