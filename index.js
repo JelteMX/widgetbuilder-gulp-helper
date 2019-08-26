@@ -3,7 +3,9 @@
 /*global module,Buffer*/
 var through = require('through2'),
     path = require('path'),
-    gutil = require('gulp-util'),
+    PluginError = require('plugin-error');
+    log = require('fancy-log');
+    colors = require('ansi-colors');
     semver = require("semver"),
     xml2js = require("xml2js"),
     spawn = require("child_process").spawn,
@@ -44,11 +46,11 @@ module.exports.generatePaths = function (pkg) {
 
     paths.showPaths = function () {
         console.log("\nShowing file paths that Gulp will use. You can edit the package.json accordingly\n");
-        console.log("TEST_PATH:                      ", gutil.colors.cyan(paths.TEST_PATH));
-        console.log("WIDGET_XML:                     ", gutil.colors.cyan(paths.WIDGET_XML));
-        console.log("PACKAGE_XML:                    ", gutil.colors.cyan(paths.PACKAGE_XML));
-        console.log("TEST_WIDGETS_FOLDER:            ", gutil.colors.cyan(paths.TEST_WIDGETS_FOLDER));
-        console.log("TEST_WIDGETS_DEPLOYMENT_FOLDER: ", gutil.colors.cyan(paths.TEST_WIDGETS_DEPLOYMENT_FOLDER), "\n");
+        console.log("TEST_PATH:                      ", colors.cyan(paths.TEST_PATH));
+        console.log("WIDGET_XML:                     ", colors.cyan(paths.WIDGET_XML));
+        console.log("PACKAGE_XML:                    ", colors.cyan(paths.PACKAGE_XML));
+        console.log("TEST_WIDGETS_FOLDER:            ", colors.cyan(paths.TEST_WIDGETS_FOLDER));
+        console.log("TEST_WIDGETS_DEPLOYMENT_FOLDER: ", colors.cyan(paths.TEST_WIDGETS_DEPLOYMENT_FOLDER), "\n");
     };
 
     return paths;
@@ -60,26 +62,26 @@ module.exports.generatePaths = function (pkg) {
 
 function changeXML(file, callback, version) {
     if (!file || !file.isBuffer() || !file.contents) {
-        throw new gutil.PluginError('xmlversion', 'error, cannot read file or file is not a buffer');
+        throw new PluginError('xmlversion', 'error, cannot read file or file is not a buffer');
     }
     var contents = file.contents.toString();
     //console.dir(Object.keys(file));
     parser.parseString(contents, function (err, res) {
         if (err) {
-            throw new gutil.PluginError('xmlversion', err);
+            throw new PluginError('xmlversion', err);
         }
         if (res.package.clientModule[0]["$"]["version"]) {
             var currentVersion = res.package.clientModule[0]["$"]["version"];
             if (!version) {
                 console.log();
-                gutil.log("Current version is " + gutil.colors.cyan(currentVersion));
-                gutil.log("Set new version by running '" + gutil.colors.cyan("gulp version --n=x.y.z"));
-                gutil.log("                        or '" + gutil.colors.cyan("npm run version -- --n=x.y.z") + "'\n");
+                log("Current version is " + colors.cyan(currentVersion));
+                log("Set new version by running '" + colors.cyan("gulp version --n=x.y.z"));
+                log("                        or '" + colors.cyan("npm run version -- --n=x.y.z") + "'\n");
                 callback(null, file);
                 return;
             } else {
                 if (!semver.valid(version) || !semver.satisfies(version, ">= 1.0.0")) {
-                    throw new gutil.PluginError('xmlversion', "Please provide a valid version that is higher than 1.0.0. Current version: " + currentVersion);
+                    throw new PluginError('xmlversion', "Please provide a valid version that is higher than 1.0.0. Current version: " + currentVersion);
                 } else {
                     res.package.clientModule[0]["$"]["version"] = version;
                     var xmlString = builder.buildObject(res);
@@ -88,7 +90,7 @@ function changeXML(file, callback, version) {
                 }
             }
         } else {
-            throw new gutil.PluginError('xmlversion', "Cannot find current version number");
+            throw new PluginError('xmlversion', "Cannot find current version number");
         }
     });
 }
